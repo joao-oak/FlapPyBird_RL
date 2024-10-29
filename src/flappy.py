@@ -16,6 +16,7 @@ from .entities import (
 )
 from .utils import GameConfig, Images, Sounds, Window
 
+import random
 
 class Flappy:
     def __init__(self):
@@ -86,6 +87,9 @@ class Flappy:
         self.score.reset()
         self.player.set_mode(PlayerMode.NORMAL)
 
+        ##
+        last_flap_time = pygame.time.get_ticks()
+        ##
         while True:
             if self.player.collided(self.pipes, self.floor):
                 return
@@ -94,10 +98,18 @@ class Flappy:
                 if self.player.crossed(pipe):
                     self.score.add()
 
-            for event in pygame.event.get():
-                self.check_quit_event(event)
-                if self.is_tap_event(event):
-                    self.player.flap()
+            # for event in pygame.event.get():
+            #     self.check_quit_event(event)
+            #     if self.is_tap_event(event):
+            #         self.player.flap()
+            
+            ##
+            current_time = pygame.time.get_ticks()
+            time_interval = random.randint(200, 700)
+            if current_time - last_flap_time >= time_interval:
+                self.player.flap()
+                last_flap_time = current_time
+            ##
 
             self.background.tick()
             self.floor.tick()
