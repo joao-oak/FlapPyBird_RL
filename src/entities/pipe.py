@@ -21,7 +21,7 @@ class Pipes(Entity):
 
     def __init__(self, config: GameConfig) -> None:
         super().__init__(config)
-        self.pipe_gap = 120
+        self.pipe_gap = 80
         self.top = 0
         self.bottom = self.config.window.viewport_height
         self.upper = []
@@ -46,7 +46,7 @@ class Pipes(Entity):
         if not last:
             return True
 
-        return self.config.window.width - (last.x + last.w) > last.w * 2.5
+        return self.config.window.width - (last.x + last.w) > last.w * 1.5
 
     def spawn_new_pipes(self):
         # add new pipe when first pipe is about to touch left of screen
