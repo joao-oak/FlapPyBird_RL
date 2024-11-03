@@ -88,7 +88,7 @@ class Flappy:
         self.player.set_mode(PlayerMode.NORMAL)
 
         ##
-        last_flap_time = pygame.time.get_ticks()
+        # last_flap_time = pygame.time.get_ticks()
         ##
         while True:
             if self.player.collided(self.pipes, self.floor):
@@ -98,17 +98,19 @@ class Flappy:
                 if self.player.crossed(pipe):
                     self.score.add()
 
-            # for event in pygame.event.get():
-            #     self.check_quit_event(event)
-            #     if self.is_tap_event(event):
-            #         self.player.flap()
+            for event in pygame.event.get():
+                self.check_quit_event(event)
+                if self.is_tap_event(event):
+                    self.player.flap()
+                    pos, next_h, next_v_l, next_v_u = self.game_state()
+                    print(pos, next_h, next_v_l, next_v_u)
             
             ##
-            current_time = pygame.time.get_ticks()
-            time_interval = random.randint(200, 700)
-            if current_time - last_flap_time >= time_interval:
-                self.player.flap()
-                last_flap_time = current_time
+            # current_time = pygame.time.get_ticks()
+            # time_interval = random.randint(200, 700)
+            # if current_time - last_flap_time >= time_interval:
+            #     self.player.flap()
+            #     last_flap_time = current_time
             ##
 
             self.background.tick()
@@ -145,3 +147,25 @@ class Flappy:
             self.config.tick()
             pygame.display.update()
             await asyncio.sleep(0)
+
+    def game_state(self):
+
+        # getting the next pipe and player's horizontal distance to the next pipe
+        next_pipe_distance_h = self.pipes.lower[0].x - self.player.x
+
+        if next_pipe_distance_h > 0:
+            next_pipe = self.pipes.lower[0]
+        else:
+            next_pipe = self.pipes.lower[1]
+            next_pipe_distance_h = next_pipe.x - self.player.x
+
+        # player's vertical distance to the ceiling
+        player_height = self.player.y
+
+        # player's vertical distance to the next lower pipe
+        next_pipe_distance_v_l = next_pipe.y - player_height
+
+        # player's vertical distance to the next upper pipe
+        next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
+
+        return player_height, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u
