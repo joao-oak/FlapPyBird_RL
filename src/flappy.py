@@ -4,16 +4,7 @@ import sys
 import pygame
 from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
-from .entities import (
-    Background,
-    Floor,
-    GameOver,
-    Pipes,
-    Player,
-    PlayerMode,
-    Score,
-    WelcomeMessage,
-)
+from .entities import Background, Floor, GameOver, Pipes, Player, PlayerMode, Score, WelcomeMessage
 from .utils import GameConfig, Images, Sounds, Window
 
 import random
@@ -44,7 +35,7 @@ class Flappy:
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
             self.score = Score(self.config)
-            await self.splash()
+            # await self.splash()
             await self.play()
             await self.game_over()
 
@@ -169,3 +160,48 @@ class Flappy:
         next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
 
         return player_height, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u
+    
+    def reset(self):
+        # from start()
+        self.background = Background(self.config)
+        self.floor = Floor(self.config)
+        self.player = Player(self.config)
+        self.welcome_message = WelcomeMessage(self.config)
+        self.game_over_message = GameOver(self.config)
+        self.pipes = Pipes(self.config)
+        self.score = Score(self.config)
+
+        # from play()
+        self.score.reset()
+        self.player.set_mode(PlayerMode.NORMAL)
+
+    def tick(self, flap_this_frame):
+        # player input
+        for event in pygame.event.get():
+            if self.is_tap_event(event):
+                flap_this_frame = True
+
+            self.check_quit_event(event)
+
+        if self.player.collided(self.pipes, self.floor):
+            return True
+
+        for i, pipe in enumerate(self.pipes.upper):
+            if self.player.crossed(pipe):
+                self.score.add()
+                
+        self.score.add()
+
+        if flap_this_frame:
+            self.player.flap()
+
+        self.background.tick()
+        self.floor.tick()
+        self.pipes.tick()
+        self.score.tick()
+        self.player.tick()
+
+        pygame.display.update()
+        # await asyncio.sleep(0)
+        self.config.tick()
+        return False
