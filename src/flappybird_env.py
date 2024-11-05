@@ -18,7 +18,7 @@ class FlappyBirdEnv(gym.Env):
 
         # continuous observation space
         # the limits should be adjusted later based on the actual variables somehow
-        self.observation_space = spaces.Box(
+        self.state_space = spaces.Box(
             low=np.array([0, 0, -512, -512]),
             high=np.array([512, 400, 512, 512]),
             shape=(4,),
