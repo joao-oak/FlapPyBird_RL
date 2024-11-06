@@ -151,3 +151,57 @@ class DQNAgent:
         # # Decay epsilon
         # if self.epsilon > self.epsilon_min:
         #     self.epsilon *= self.epsilon_decay
+
+    def training(self, env, episodes, seed=21):
+
+        # Deep Q-Network (DQN)
+
+        for episode in range(episodes):
+            state = env.reset()
+            state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
+            total_reward = 0
+            done = False
+            
+            while not done:
+                # Choose action
+                action = self.choose_action(state)
+                
+                # act in the environment
+                next_state, reward, done, _ = env.step(action.item())
+                
+                if done:
+                    next_state = None
+                else:
+                    next_state = torch.tensor(next_state, dtype=torch.float).unsqueeze(0)
+
+                # save the experience in memory
+                self.memory.push(state, action, next_state, reward)
+                
+                # Update state
+                state = next_state
+                total_reward += reward
+
+                # Train the policy model
+                self.replay()
+
+                # soft update of the target model
+                target_model_state_dict = self.target_model.state_dict() # dictionay that maps each layer to its parameter tensor
+                policy_model_state_dict = self.policy_model.state_dict()
+                for key in policy_model_state_dict:
+                    target_model_state_dict[key] = policy_model_state_dict[key]*self.tau + target_model_state_dict[key]*(1-self.tau)
+                self.target_model.load_state_dict(target_model_state_dict)
+
+                if done:
+                    self.episode_rewards.append(total_reward)
+                    self.plot_rewards()
+
+            if episode > 1 and (episode+1) % 500 == 0:
+                torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
+                print(f'Saved weigths after {episode} episodes')
+
+            print(f"Episode: {episode+1}/{episodes}, Total Reward: {total_reward}")
+        
+        print('Finished training')
+        self.plot_rewards(show_result=True)
+        plt.ioff()
+        plt.show()
