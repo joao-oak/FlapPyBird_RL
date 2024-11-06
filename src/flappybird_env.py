@@ -27,7 +27,7 @@ class FlappyBirdEnv(gym.Env):
 
     def reset(self):
         # reset to initial state
-        asyncio.run(self.game.reset())
+        self.game.reset()
         
         # initial state observations
         return self._get_state()
@@ -40,17 +40,13 @@ class FlappyBirdEnv(gym.Env):
         state = self._get_state()
         
         reward = 1 # 1 for not dying
-        if self.game.player.collided_pipe(self.game.pipes):
+        if self.game.player.collided(self.game.pipes, self.game.floor):
             reward -= 10 
-        if self.game.player.collided_floor(self.game.floor):
-            reward -= 10
-        # if self.game.player.cy <= 0:
-        #      reward -= 5
+        if self.game.player.y > 300 or self.game.player.y < 150:
+             reward -= 5
         for i, pipe in enumerate(self.game.pipes.upper):
             if self.game.player.crossed(pipe):
                 reward += 50  # Reward for passing a pipe
-                self.pipe_count += 1
-                print(f"Passed pipe: {self.pipe_count}")
 
         # self.game._draw_observation_points(obs)
         return state, reward, terminated, False

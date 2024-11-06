@@ -152,12 +152,12 @@ class DQNAgent:
         # if self.epsilon > self.epsilon_min:
         #     self.epsilon *= self.epsilon_decay
 
-    def training(self, env, episodes, seed=21):
+    def training(self, episodes, seed=21):
 
         # Deep Q-Network (DQN)
 
         for episode in range(episodes):
-            state = env.reset()
+            state = self.env.reset()
             state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
             total_reward = 0
             done = False
@@ -167,7 +167,8 @@ class DQNAgent:
                 action = self.choose_action(state)
                 
                 # act in the environment
-                next_state, reward, done, _ = env.step(action.item())
+                next_state, reward, done, _ = self.env.step(action.item())
+                reward = torch.tensor([reward])
                 
                 if done:
                     next_state = None
@@ -193,7 +194,7 @@ class DQNAgent:
 
                 if done:
                     self.episode_rewards.append(total_reward)
-                    self.plot_rewards()
+                    # self.plot_rewards()
 
             if episode > 1 and (episode+1) % 500 == 0:
                 torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
