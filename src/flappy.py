@@ -93,8 +93,8 @@ class Flappy:
                 self.check_quit_event(event)
                 if self.is_tap_event(event):
                     self.player.flap()
-                    pos, next_h, next_v_l, next_v_u = self.game_state()
-                    print(pos, next_h, next_v_l, next_v_u)
+                    pos, vel, next_h, next_v_l, next_v_u = self.game_state()
+                    print(pos, vel, next_h, next_v_l, next_v_u)
             
             ##
             # current_time = pygame.time.get_ticks()
@@ -153,13 +153,16 @@ class Flappy:
         # player's vertical distance to the ceiling
         player_height = self.player.y
 
+        # player's vertical velocity
+        player_velocity = self.player.vel_y
+
         # player's vertical distance to the next lower pipe
         next_pipe_distance_v_l = next_pipe.y - player_height
 
         # player's vertical distance to the next upper pipe
         next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
 
-        return player_height, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u
+        return player_height, player_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u
     
     def reset(self):
         # from start()

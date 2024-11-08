@@ -53,5 +53,5 @@ class FlappyBirdEnv(gym.Env):
 
     # não sei se não é melhor implementar a função aqui logo
     def _get_state(self):
-        pos, next_h, next_v_l, next_v_u = self.game.game_state()
-        return np.array([pos, next_h, next_v_l, next_v_u])
+        pos, vel, next_h, next_v_l, next_v_u = self.game.game_state()
+        return np.array([pos, vel, next_h, next_v_l, next_v_u])
