@@ -49,7 +49,7 @@ class DQNetwork(nn.Module):
 
 
 class DQNAgent:
-    def __init__(self, env, learning_rate=5e-5, gamma=0.99, tau=0.005 ,epsilon_start=0.1, epsilon_min=0.0001, epsilon_decay=3000, batch_size=32, memory_size=10000):
+    def __init__(self, env, learning_rate=0.005, gamma=0.99, tau=0.005 ,epsilon_start=0.1, epsilon_min=0.0001, epsilon_decay=3000, batch_size=32, memory_size=10000):
         self.epsilon_start = epsilon_start
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -109,6 +109,7 @@ class DQNAgent:
             plt.plot(means.numpy())
 
         plt.pause(0.001)  # pause a bit so that plots are updated
+        plt.savefig('chart.png', dpi=300) 
         plt.show()
 
     def replay(self):
