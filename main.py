@@ -9,4 +9,4 @@ if __name__ == "__main__":
 
     env = FlappyBirdEnv()
     model = deep_q_n.DQNAgent(env)
-    model.training(3000)
+    model.training(30000)

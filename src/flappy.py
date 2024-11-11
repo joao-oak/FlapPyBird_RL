@@ -20,7 +20,7 @@ class Flappy:
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
-            fps=30,
+            fps=600,
             window=window,
             images=images,
             sounds=Sounds(),
@@ -93,8 +93,8 @@ class Flappy:
                 self.check_quit_event(event)
                 if self.is_tap_event(event):
                     self.player.flap()
-                    pos, vel, next_h, next_v_l, next_v_u = self.game_state()
-                    print(pos, vel, next_h, next_v_l, next_v_u)
+                    pos, vel, next_h, next_v_l, next_v_u, next_next_h, next_next_v_l, next_next_v_u = self.game_state()
+                    print(pos, vel, next_h, next_v_l, next_v_u, next_next_h, next_next_v_l, next_next_v_u)
             
             ##
             # current_time = pygame.time.get_ticks()
@@ -142,27 +142,51 @@ class Flappy:
     def game_state(self):
 
         # getting the next pipe and player's horizontal distance to the next pipe
-        next_pipe_distance_h = self.pipes.lower[0].x - self.player.x
+        # next_pipe_distance_h = self.pipes.lower[0].x - self.player.x
 
-        if next_pipe_distance_h > 0:
-            next_pipe = self.pipes.lower[0]
-        else:
-            next_pipe = self.pipes.lower[1]
-            next_pipe_distance_h = next_pipe.x - self.player.x
+        # if next_pipe_distance_h > 0:
+        #     next_pipe = self.pipes.lower[0]
+        # else:
+        #     next_pipe = self.pipes.lower[1]
+        #     next_pipe_distance_h = next_pipe.x - self.player.x
 
         # player's vertical distance to the ceiling
-        player_height = self.player.y
+        player_height = self.player.y / 512
 
         # player's vertical velocity
-        player_velocity = self.player.vel_y
+        player_velocity = self.player.vel_y / 9
 
-        # player's vertical distance to the next lower pipe
-        next_pipe_distance_v_l = next_pipe.y - player_height
+        if len(self.pipes.lower) == 1:
+            next_pipe = self.pipes.lower[0]
 
-        # player's vertical distance to the next upper pipe
-        next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
+            next_pipe_distance_h = (next_pipe.x - self.player.x) / 288
+            next_pipe_distance_v_l = (next_pipe.y - player_height) / 512
+            next_pipe_distance_v_u = (next_pipe_distance_v_l - self.pipes.pipe_gap) / 512
 
-        return player_height, player_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u
+            next_next_pipe_distance_h = (2*(next_pipe_distance_h)) / 288
+            next_next_pipe_distance_v_l = (next_pipe_distance_v_l) / 512
+            next_next_pipe_distance_v_u = (next_pipe_distance_v_u) / 512
+        
+        else:
+            next_pipe = self.pipes.lower[0]
+            next_next_pipe = self.pipes.lower[1]
+
+            next_pipe_distance_h = (next_pipe.x - self.player.x) / 288
+            next_pipe_distance_v_l = (next_pipe.y - player_height) / 512
+            next_pipe_distance_v_u = (next_pipe_distance_v_l - self.pipes.pipe_gap) / 512
+
+            next_next_pipe_distance_h = (next_next_pipe.x - self.player.x) / 288
+            next_next_pipe_distance_v_l = (next_next_pipe.y - player_height) / 512
+            next_next_pipe_distance_v_u = (next_next_pipe_distance_v_l - self.pipes.pipe_gap) / 512
+
+        # # player's vertical distance to the next lower pipe
+        # next_pipe_distance_v_l = next_pipe.y - player_height
+
+        # # player's vertical distance to the next upper pipe
+        # next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
+
+
+        return player_height, player_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u, next_next_pipe_distance_h, next_next_pipe_distance_v_l, next_next_pipe_distance_v_u
     
     def reset(self):
         # from start()

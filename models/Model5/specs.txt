@@ -1,0 +1,15 @@
+Reward function: collides = -10; outside of midrange = -5; cross pipe = +100
+
+Network hyperparameters: 
+learning_rate=5e-5, gamma=0.99, tau=0.005 ,epsilon_start=0.1, epsilon_min=0.0001, epsilon_decay=3000, batch_size=32, memory_size=10000
+
+States:
+player_height, player_y_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u, next_next_pipe_distance_h, next_next_pipe_distance_v_l, next_next_pipe_distance_v_u
+
+Gradient clipping = 100
+
+Update network every 20 steps
+
+Normalized input
+
+Layer size = 128

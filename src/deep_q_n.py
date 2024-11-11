@@ -38,9 +38,9 @@ class ReplayMemory:
 class DQNetwork(nn.Module):
     def __init__(self, state_size, action_size):
         super(DQNetwork, self).__init__()
-        self.fc1 = nn.Linear(state_size, 64)
-        self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, action_size)
+        self.fc1 = nn.Linear(state_size, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, action_size)
     
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -49,7 +49,7 @@ class DQNetwork(nn.Module):
 
 
 class DQNAgent:
-    def __init__(self, env, learning_rate=0.005, gamma=0.99, tau=0.005 ,epsilon_start=0.1, epsilon_min=0.0001, epsilon_decay=3000, batch_size=32, memory_size=10000):
+    def __init__(self, env, learning_rate=5e-4, gamma=0.99, tau=0.01 ,epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=64, memory_size=20000):
         self.epsilon_start = epsilon_start
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -57,6 +57,7 @@ class DQNAgent:
         self.tau = tau
         self.batch_size = batch_size
         self.learning_rate = learning_rate
+        self.update_target_frequency = 20
 
         self.env = env
         state = env.reset()
@@ -161,11 +162,12 @@ class DQNAgent:
             state = self.env.reset()
             state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
             total_reward = 0
+            self.steps_done = 0
             done = False
             
             while not done:
                 # Choose action
-                action = self.choose_action(state)
+                action = self.choose_action(state, deterministic=True)
                 
                 # act in the environment
                 next_state, reward, done, _ = self.env.step(action.item())
@@ -187,7 +189,8 @@ class DQNAgent:
                 self.replay()
 
                 # soft update of the target model
-                target_model_state_dict = self.target_model.state_dict() # dictionay that maps each layer to its parameter tensor
+                # if self.steps_done % self.update_target_frequency == 0:
+                target_model_state_dict = self.target_model.state_dict() # dictionary that maps each layer to its parameter tensor
                 policy_model_state_dict = self.policy_model.state_dict()
                 for key in policy_model_state_dict:
                     target_model_state_dict[key] = policy_model_state_dict[key]*self.tau + target_model_state_dict[key]*(1-self.tau)

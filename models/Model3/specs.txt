@@ -5,3 +5,7 @@ learning_rate=0.005, gamma=0.99, tau=0.005 ,epsilon_start=0.1, epsilon_min=0.000
 
 States:
 player_height, player_y_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u
+
+Gradient clipping = 100
+
+Update network every step
