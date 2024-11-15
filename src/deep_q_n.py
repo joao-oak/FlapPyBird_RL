@@ -158,6 +158,8 @@ class DQNAgent:
 
         # Deep Q-Network (DQN)
 
+        # PERCEBER SE O MODEL.TRAIN() É PRECISO AQUI OU NÃO
+
         for episode in range(episodes):
             state = self.env.reset()
             state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
