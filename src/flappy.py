@@ -114,9 +114,11 @@ class Flappy:
 
             next_pipe_y_l = next_v_l + pos
             next_pipe_y_u = next_v_u + pos
+            next_pipe_x = next_h + self.player.x + 26
 
             pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_l), (288, next_pipe_y_l), 2)
             pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_u), (288, next_pipe_y_u), 2)
+            pygame.draw.circle(self.screen, (255,255,255), (next_pipe_x, (next_pipe_y_l+next_pipe_y_u)/2), 3)
 
             pygame.display.update()
             await asyncio.sleep(0)
