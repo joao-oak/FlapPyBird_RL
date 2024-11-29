@@ -47,9 +47,8 @@ class DQNetwork(nn.Module):
         x = torch.relu(self.fc2(x))
         return self.fc3(x)
 
-
 class DQNAgent:
-    def __init__(self, env, learning_rate=5e-4, gamma=0.99, tau=0.01 ,epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=64, memory_size=20000):
+    def __init__(self, env, learning_rate=5e-4, gamma=0.99, tau=0.01 ,epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=10000):
         self.epsilon_start = epsilon_start
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -89,17 +88,35 @@ class DQNAgent:
         with torch.no_grad():
             return self.policy_model(state).max(1).indices.view(1, 1)
         
-    def plot_rewards(self, show_result=False):
+    # def plot_rewards(self, show_result=False):
 
-        plt.ion()
+    #     # plt.ion()
 
-        plt.figure(1)
+    #     plt.figure(1)
+    #     rewards_t = torch.tensor(self.episode_rewards, dtype=torch.float)
+    #     if show_result:
+    #         plt.title('DQN Result')
+    #     else:
+    #         plt.clf()
+    #         plt.title('Training...')
+    #     plt.xlabel('Episode')
+    #     plt.ylabel('Total Rewards')
+    #     plt.plot(rewards_t.numpy())
+    #     # Take 100 episode averages and plot them too
+    #     if len(rewards_t) >= 100:
+    #         means = rewards_t.unfold(0, 100, 1).mean(1).view(-1)
+    #         means = torch.cat((torch.zeros(99), means))
+    #         plt.plot(means.numpy())
+
+    #     plt.pause(0.001)  # pause a bit so that plots are updated
+    #     plt.savefig('chart.png', dpi=300) 
+    #     # plt.show()
+
+    def plot_rewards(self):
+
+
         rewards_t = torch.tensor(self.episode_rewards, dtype=torch.float)
-        if show_result:
-            plt.title('DQN Result')
-        else:
-            plt.clf()
-            plt.title('Training...')
+        plt.title('DQN Result')
         plt.xlabel('Episode')
         plt.ylabel('Total Rewards')
         plt.plot(rewards_t.numpy())
@@ -108,10 +125,7 @@ class DQNAgent:
             means = rewards_t.unfold(0, 100, 1).mean(1).view(-1)
             means = torch.cat((torch.zeros(99), means))
             plt.plot(means.numpy())
-
-        plt.pause(0.001)  # pause a bit so that plots are updated
         plt.savefig('chart.png', dpi=300) 
-        plt.show()
 
     def replay(self):
 
@@ -205,10 +219,36 @@ class DQNAgent:
             if episode > 1 and (episode+1) % 500 == 0:
                 torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
                 print(f'Saved weigths after {episode} episodes')
+                self.plot_rewards()
 
             print(f"Episode: {episode+1}/{episodes}, Total Reward: {total_reward}")
+
+            if total_reward > 70000:
+                torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
+                print(f'Saved weigths after {episode} episodes')
         
         print('Finished training')
         self.plot_rewards(show_result=True)
         plt.ioff()
         plt.show()
+    
+    def ai_play(self, filename):
+
+        loaded_state_dict = torch.load(filename)
+        self.policy_model.load_state_dict(loaded_state_dict)
+        self.target_model.load_state_dict(loaded_state_dict)
+
+        state = self.env.reset()
+        state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        total_reward = 0
+        while True:
+            
+            action = self.choose_action(state, deterministic=True)
+
+            next_state, reward, done, _ = self.env.step(action.item())
+            total_reward += reward
+            if done:
+                print(f"Total Reward: {total_reward}")
+                break
+
+            state = torch.tensor(next_state, dtype=torch.float32).unsqueeze(0)

@@ -20,7 +20,7 @@ class Flappy:
         self.config = GameConfig(
             screen=self.screen,
             clock=pygame.time.Clock(),
-            fps=30,
+            fps=1000,
             window=window,
             images=images,
             sounds=Sounds(),
@@ -110,15 +110,13 @@ class Flappy:
             self.score.tick()
             self.player.tick()
 
-            pos, vel, next_h, next_v_l, next_v_u  = self.game_state()
+            player_height, player_velocity, next_pipe_distance_h, next_pipe_l_y, next_pipe_u_y  = self.game_state()
 
-            next_pipe_y_l = next_v_l + pos
-            next_pipe_y_u = next_v_u + pos
-            next_pipe_x = next_h + self.player.x + 26
+            next_pipe_x = next_pipe_distance_h + self.player.x - 26 # the pipe sprite is 52 pixels wide
 
-            pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_l), (288, next_pipe_y_l), 2)
-            pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_u), (288, next_pipe_y_u), 2)
-            pygame.draw.circle(self.screen, (255,255,255), (next_pipe_x, (next_pipe_y_l+next_pipe_y_u)/2), 3)
+            pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_l_y), (288, next_pipe_l_y), 2)
+            pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_u_y), (288, next_pipe_u_y), 2)
+            pygame.draw.circle(self.screen, (255,255,255), (next_pipe_x, (next_pipe_l_y+next_pipe_u_y)/2), 3)
 
             pygame.display.update()
             await asyncio.sleep(0)
@@ -152,13 +150,13 @@ class Flappy:
     def game_state(self):
 
         # getting the next pipe and player's horizontal distance to the next pipe
-        next_pipe_distance_h = self.pipes.lower[0].x - self.player.x
+        next_pipe_distance_h = self.pipes.lower[0].x - self.player.x + 52 # passing the distance to the end of the pipe, not the beginning
 
         if next_pipe_distance_h > 0:
             next_pipe = self.pipes.lower[0]
         else:
             next_pipe = self.pipes.lower[1]
-            next_pipe_distance_h = next_pipe.x - self.player.x
+            next_pipe_distance_h = next_pipe.x - self.player.x + 52
 
         # player's vertical distance to the ceiling
         player_height = self.player.y
@@ -166,6 +164,16 @@ class Flappy:
         # player's vertical velocity
         player_velocity = self.player.vel_y
 
+        # next lower pipe's height
+        next_pipe_l_y = next_pipe.y
+
+        # next upper pipe's height
+        next_pipe_u_y = next_pipe.y - self.pipes.pipe_gap
+
+        # mid-point 
+        next_pipe_mid = (next_pipe_l_y + next_pipe_u_y) /2 # not including for now
+
+        ### Para passar dois pipes. Normalizado
         # if len(self.pipes.lower) == 1:
         #     next_pipe = self.pipes.lower[0]
 
@@ -188,15 +196,20 @@ class Flappy:
         #     next_next_pipe_distance_h = (next_next_pipe.x - self.player.x) / 288
         #     next_next_pipe_distance_v_l = (next_next_pipe.y - player_height) / 512
         #     next_next_pipe_distance_v_u = (next_next_pipe_distance_v_l - self.pipes.pipe_gap) / 512
+        ###############################################
 
-        # player's vertical distance to the next lower pipe
-        next_pipe_distance_v_l = next_pipe.y - player_height
+        # # player's vertical distance to the next lower pipe
+        # next_pipe_distance_v_l = next_pipe.y - player_height
 
-        # player's vertical distance to the next upper pipe
-        next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
+        # # player's vertical distance to the next upper pipe
+        # next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
 
-        return player_height, player_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u#, next_next_pipe_distance_h, next_next_pipe_distance_v_l, next_next_pipe_distance_v_u
-    
+        # return player_height, player_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u, next_next_pipe_distance_h, next_next_pipe_distance_v_l, next_next_pipe_distance_v_u
+        return player_height, player_velocity, next_pipe_distance_h, next_pipe_l_y, next_pipe_u_y
+        # Pomos as ditancias em absoluto ou a diferença para o height do player?
+        # Acho que as diferenças é capaz de ser melhor e mais direto. Assim o modelo tenta minimizar as distâncias diretamente em
+        # vez de ter de conciliar a distância em aboluto e a player height para derivar a diferença
+
     def reset(self):
         # from start()
         self.background = Background(self.config)
@@ -225,6 +238,8 @@ class Flappy:
         for i, pipe in enumerate(self.pipes.upper):
             if self.player.crossed(pipe):
                 self.score.add()
+                # if self.score.score == 100:
+                #     return True
 
         if flap_this_frame:
             self.player.flap()
@@ -235,11 +250,12 @@ class Flappy:
         self.score.tick()
         self.player.tick()
 
-        ht, vel, d_h, d_v_l, d_v_u = self.game_state()
-        next_pipe_y_l = self.pipes.lower[0].y
-        next_pipe_y_u = self.pipes.lower[0].y - self.pipes.pipe_gap
-        pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_l), (288, next_pipe_y_l), 2)
-        pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_u), (288, next_pipe_y_u), 2)
+        # # Desenhinhos
+        # ht, vel, d_h, d_v_l, d_v_u = self.game_state()
+        # next_pipe_y_l = self.pipes.lower[0].y
+        # next_pipe_y_u = self.pipes.lower[0].y - self.pipes.pipe_gap
+        # pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_l), (288, next_pipe_y_l), 2)
+        # pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_y_u), (288, next_pipe_y_u), 2)
 
         pygame.display.update()
         # await asyncio.sleep(0)
