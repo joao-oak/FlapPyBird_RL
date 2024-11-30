@@ -17,4 +17,4 @@ if __name__ == "__main__":
     # To play the game using a trained model
     env = FlappyBirdEnv()
     model = deep_q_n.DQNAgent(env)
-    model.ai_play('100.pt')
+    model.ai_play('models/TopModel/50.pt')
