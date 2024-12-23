@@ -10,7 +10,7 @@ from .utils import GameConfig, Images, Sounds, Window
 import random
 
 class Flappy:
-    def __init__(self):
+    def __init__(self, fps=30):
         pygame.init()
         pygame.display.set_caption("Flappy Bird")
         window = Window(288, 512)
@@ -20,7 +20,7 @@ class Flappy:
         self.config = GameConfig(
             screen=self.screen,
             clock=pygame.time.Clock(),
-            fps=1000,
+            fps=fps,
             window=window,
             images=images,
             sounds=Sounds(),
@@ -114,9 +114,10 @@ class Flappy:
 
             next_pipe_x = next_pipe_distance_h + self.player.x - 26 # the pipe sprite is 52 pixels wide
 
-            pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_l_y), (288, next_pipe_l_y), 2)
-            pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_u_y), (288, next_pipe_u_y), 2)
-            pygame.draw.circle(self.screen, (255,255,255), (next_pipe_x, (next_pipe_l_y+next_pipe_u_y)/2), 3)
+            # # Desenhinhos reward function
+            # pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_l_y), (288, next_pipe_l_y), 2)
+            # pygame.draw.line(self.screen, (255,0,0), (0, next_pipe_u_y), (288, next_pipe_u_y), 2)
+            # pygame.draw.circle(self.screen, (255,255,255), (next_pipe_x, (next_pipe_l_y+next_pipe_u_y)/2), 3)
 
             pygame.display.update()
             await asyncio.sleep(0)

@@ -8,10 +8,10 @@ import pygame
 from .flappy import Flappy
 
 class FlappyBirdEnv(gym.Env):
-    def __init__(self):
+    def __init__(self, fps=30):
         
         # original game instance
-        self.game = Flappy()
+        self.game = Flappy(fps=fps)
 
         # To flap or not to flap: 0 for no flap, 1 for flap
         self.action_space = spaces.Discrete(2)

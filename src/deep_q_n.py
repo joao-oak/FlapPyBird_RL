@@ -243,6 +243,7 @@ class DQNAgent:
             total_reward += reward
             if done:
                 print(f"Total Reward: {total_reward}")
-                break
+                total_reward = 0
+                state = self.env.reset()
 
             state = torch.tensor(next_state, dtype=torch.float32).unsqueeze(0)

@@ -91,7 +91,7 @@ class ActorCritic(nn.Module):
 
 
 class PPO:
-    def __init__(self, env, state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, action_std_init=0.6):
+    def __init__(self, env, lr_actor, lr_critic, gamma, K_epochs, eps_clip, action_std_init=0.6):
 
 
         self.gamma = gamma
@@ -100,29 +100,20 @@ class PPO:
         
         self.buffer = RolloutBuffer()
 
-        self.policy = ActorCritic(state_dim, action_dim, action_std_init).to(device)
+        self.env = env
+        self.state_dim = self.env.state_space.shape[0]
+        self.action_dim = self.env.action_space.n
+
+        self.policy = ActorCritic(self.state_dim, self.action_dim, action_std_init).to(device)
         self.optimizer = torch.optim.Adam([
                         {'params': self.policy.actor.parameters(), 'lr': lr_actor},
                         {'params': self.policy.critic.parameters(), 'lr': lr_critic}
                     ])
 
-        self.policy_old = ActorCritic(state_dim, action_dim, action_std_init).to(device)
+        self.policy_old = ActorCritic(self.state_dim, self.action_dim, action_std_init).to(device)
         self.policy_old.load_state_dict(self.policy.state_dict())
         
         self.MseLoss = nn.MSELoss()
-
-        self.env = env
-
-    def set_action_std(self, new_action_std):
-
-        print("--------------------------------------------------------------------------------------------")
-        print("WARNING : Calling PPO::set_action_std() on discrete action space policy")
-        print("--------------------------------------------------------------------------------------------")
-
-    def decay_action_std(self, action_std_decay_rate, min_action_std):
-        print("--------------------------------------------------------------------------------------------")
-        print("WARNING : Calling PPO::decay_action_std() on discrete action space policy")
-        print("--------------------------------------------------------------------------------------------")
 
     def select_action(self, state):
 
@@ -197,7 +188,7 @@ class PPO:
         self.policy_old.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
         self.policy.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
     
-    def train(self, max_training_timesteps, random_seed, max_ep_len, update_timestep, log_freq, print_freq, save_model_freq):
+    def train(self, max_training_timesteps, random_seed, max_ep_len):
 
         ###################### logging ######################
 
@@ -262,6 +253,11 @@ class PPO:
 
         time_step = 0
         i_episode = 0
+
+        update_timestep = max_ep_len * 4
+        log_freq = max_ep_len * 2
+        print_freq = max_ep_len * 10
+        save_model_freq = int(1e5) 
 
         # training loop
         while time_step <= max_training_timesteps:
