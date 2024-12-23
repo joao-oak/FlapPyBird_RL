@@ -48,7 +48,7 @@ class DQNetwork(nn.Module):
         return self.fc3(x)
 
 class DQNAgent:
-    def __init__(self, env, learning_rate=5e-4, gamma=0.99, tau=0.01 ,epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=10000):
+    def __init__(self, env, learning_rate=1e-4, gamma=0.99, tau=0.005, epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=10000):
         self.epsilon_start = epsilon_start
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -88,44 +88,36 @@ class DQNAgent:
         with torch.no_grad():
             return self.policy_model(state).max(1).indices.view(1, 1)
         
-    # def plot_rewards(self, show_result=False):
 
-    #     # plt.ion()
+    # def plot_rewards(self, episode):
 
-    #     plt.figure(1)
     #     rewards_t = torch.tensor(self.episode_rewards, dtype=torch.float)
-    #     if show_result:
-    #         plt.title('DQN Result')
-    #     else:
-    #         plt.clf()
-    #         plt.title('Training...')
+    #     plt.title('DQN Result')
     #     plt.xlabel('Episode')
     #     plt.ylabel('Total Rewards')
-    #     plt.plot(rewards_t.numpy())
+    #     plt.plot(rewards_t.numpy(), color="tab:blue")
     #     # Take 100 episode averages and plot them too
     #     if len(rewards_t) >= 100:
     #         means = rewards_t.unfold(0, 100, 1).mean(1).view(-1)
     #         means = torch.cat((torch.zeros(99), means))
-    #         plt.plot(means.numpy())
+    #         plt.plot(means.numpy(), color="tab:orange")
+    #     plt.savefig(f'chart_{episode}.png', dpi=300) 
 
-    #     plt.pause(0.001)  # pause a bit so that plots are updated
-    #     plt.savefig('chart.png', dpi=300) 
-    #     # plt.show()
-
-    def plot_rewards(self):
-
-
+    def plot_rewards(self, episode):
         rewards_t = torch.tensor(self.episode_rewards, dtype=torch.float)
         plt.title('DQN Result')
         plt.xlabel('Episode')
         plt.ylabel('Total Rewards')
-        plt.plot(rewards_t.numpy())
-        # Take 100 episode averages and plot them too
+
+        plt.scatter(range(len(rewards_t)), rewards_t.numpy(), color="tab:blue", label='Rewards', s=2)
+
         if len(rewards_t) >= 100:
             means = rewards_t.unfold(0, 100, 1).mean(1).view(-1)
             means = torch.cat((torch.zeros(99), means))
-            plt.plot(means.numpy())
-        plt.savefig('chart.png', dpi=300) 
+            plt.plot(means.numpy(), color="tab:orange", label='100-episode average')
+        plt.legend()
+        plt.savefig(f'chart_{episode}.png', dpi=300)
+        plt.close()
 
     def replay(self):
 
@@ -205,12 +197,17 @@ class DQNAgent:
                 self.replay()
 
                 # soft update of the target model
-                # if self.steps_done % self.update_target_frequency == 0:
-                target_model_state_dict = self.target_model.state_dict() # dictionary that maps each layer to its parameter tensor
-                policy_model_state_dict = self.policy_model.state_dict()
-                for key in policy_model_state_dict:
-                    target_model_state_dict[key] = policy_model_state_dict[key]*self.tau + target_model_state_dict[key]*(1-self.tau)
-                self.target_model.load_state_dict(target_model_state_dict)
+                # # if self.steps_done % self.update_target_frequency == 0: # to update the target model every update_target_frequency steps
+                # target_model_state_dict = self.target_model.state_dict() # dictionary that maps each layer to its parameter tensor
+                # policy_model_state_dict = self.policy_model.state_dict()
+                # for key in policy_model_state_dict:
+                #     target_model_state_dict[key] = policy_model_state_dict[key]*self.tau + target_model_state_dict[key]*(1-self.tau)
+                # self.target_model.load_state_dict(target_model_state_dict)
+
+                if self.steps_done % self.update_target_frequency == 0:
+                    for target_param, policy_param in zip(self.target_model.parameters(), self.policy_model.parameters()):
+                        target_param.data.copy_(self.tau * policy_param.data + (1.0 - self.tau) * target_param.data)
+
 
                 if done:
                     self.episode_rewards.append(total_reward)
@@ -219,18 +216,15 @@ class DQNAgent:
             if episode > 1 and (episode+1) % 500 == 0:
                 torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
                 print(f'Saved weigths after {episode} episodes')
-                self.plot_rewards()
+                self.plot_rewards(episode)
 
             print(f"Episode: {episode+1}/{episodes}, Total Reward: {total_reward}")
 
-            if total_reward > 70000:
-                torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
-                print(f'Saved weigths after {episode} episodes')
+            # if total_reward > 70000:
+            #     torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
+            #     print(f'Saved weigths after {episode} episodes')
         
         print('Finished training')
-        self.plot_rewards(show_result=True)
-        plt.ioff()
-        plt.show()
     
     def ai_play(self, filename):
 

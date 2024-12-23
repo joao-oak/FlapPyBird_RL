@@ -1,0 +1,18 @@
+Every step = 1; Reward function collides = -100; inside midrange of next pipe = +5; cross pipe = +10; every 5 pipes = +100 [proxy for terminal state]
+
+Network hyperparameters 
+learning_rate=5e-5, gamma=0.99, tau=0.01, epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=10000
+NO EPSILON, WAS SET TO DETERMINISTIC MODE WHERE THE ACTION IS ALWAYS RETRIEVED FROM THE NETWORK.
+
+States
+player_height, player_velocity, next_pipe_distance_h, next_pipe_lower_y, next_pipe_upper_y
+
+Gradient clipping = 100
+
+Update network every step
+
+New implementation for updating target network
+
+Not normalized input
+
+Layer size = 128

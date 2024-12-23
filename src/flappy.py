@@ -238,8 +238,8 @@ class Flappy:
         for i, pipe in enumerate(self.pipes.upper):
             if self.player.crossed(pipe):
                 self.score.add()
-                # if self.score.score == 100:
-                #     return True
+                if self.score.score == 50:
+                    return True
 
         if flap_this_frame:
             self.player.flap()
