@@ -224,6 +224,9 @@ class PPO:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        #variables needed to compare models
+        rew = 0
+        print_avg_reward = 0
 
         checkpoint_path = directory + "PPO_{}_{}_{}.pth".format('FlappyBird', random_seed, run_num_pretrained)
         print("save checkpoint path : " + checkpoint_path)
@@ -308,12 +311,15 @@ class PPO:
                     print_running_episodes = 0
 
                 # save model weights
-                if time_step % save_model_freq == 0:
+                #if time_step % save_model_freq == 0: ## Previous approach to save
+                if print_avg_reward > rew:
                     print("--------------------------------------------------------------------------------------------")
                     print("saving model at : " + checkpoint_path)
                     self.save(checkpoint_path)
                     print("model saved")
                     print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
+                    print(f"previous max: {rew}, new max: {print_avg_reward}")
+                    rew=print_avg_reward
                     print("--------------------------------------------------------------------------------------------")
 
                 # break; if the episode is over
