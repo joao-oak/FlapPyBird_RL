@@ -190,30 +190,7 @@ class PPO:
         self.policy_old.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
         self.policy.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
     
-    def train(self, max_training_timesteps, random_seed, max_ep_len):
-
-        ###################### logging ######################
-
-        #### log files for multiple runs are NOT overwritten
-        log_dir = "PPO_logs"
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
-
-        log_dir = log_dir + '/' + 'FlappyBird' + '/'
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
-
-        #### get number of log files in log directory
-        run_num = 0
-        current_num_files = next(os.walk(log_dir))[2]
-        run_num = len(current_num_files)
-
-        #### create new log file for each run
-        log_f_name = log_dir + '/PPO_' + 'FlappyBird' + "_log_" + str(run_num) + ".csv"
-
-        print("current logging run number for " + 'FlappyBird' + " : ", run_num)
-        print("logging at : " + log_f_name)
-        #####################################################
+    def train(self, random_seed, episodes):
 
         ################### checkpointing ###################
         run_num_pretrained = 0      #### change this to prevent overwriting weights in same env_name folder
@@ -227,8 +204,8 @@ class PPO:
             os.makedirs(directory)
 
         #variables needed to compare models
-        rew = 0
-        print_avg_reward = 0
+        reward_goal = 10000
+        max_reward = 0
 
         checkpoint_path = directory + "PPO_{}_{}_{}.pth".format('FlappyBird', random_seed, run_num_pretrained)
         print("save checkpoint path : " + checkpoint_path)
@@ -245,32 +222,18 @@ class PPO:
 
         print("============================================================================================")
 
-        # logging file
-        log_f = open(log_f_name,"w+")
-        log_f.write('episode,timestep,reward\n')
-
-        # printing and logging variables
-        print_running_reward = 0
-        print_running_episodes = 0
-
-        log_running_reward = 0
-        log_running_episodes = 0
-
+        update_timestep = 4000
         time_step = 0
-        i_episode = 0
-
-        update_timestep = max_ep_len * 4
-        log_freq = max_ep_len * 2
-        print_freq = max_ep_len * 10
-        save_model_freq = int(1e5) 
 
         # training loop
-        while time_step <= max_training_timesteps:
+        for episode in range(episodes):
 
             state = self.env.reset()
             current_ep_reward = 0
+            episode_step = 0
+            done = False
 
-            for t in range(1, max_ep_len+1):
+            while not done:
 
                 # select action with policy
                 action = self.select_action(state)
@@ -281,62 +244,20 @@ class PPO:
                 self.buffer.is_terminals.append(done)
 
                 time_step +=1
+                episode_step += 1
                 current_ep_reward += reward
 
                 # update PPO agent
                 if time_step % update_timestep == 0:
                     self.update()
 
-                # log in logging file
-                if time_step % log_freq == 0:
-
-                    # log average reward till last episode
-                    log_avg_reward = log_running_reward / log_running_episodes
-                    log_avg_reward = round(log_avg_reward, 4)
-
-                    log_f.write('{},{},{}\n'.format(i_episode, time_step, log_avg_reward))
-                    log_f.flush()
-
-                    log_running_reward = 0
-                    log_running_episodes = 0
-
-                # printing average reward
-                if time_step % print_freq == 0:
-
-                    # print average reward till last episode
-                    print_avg_reward = print_running_reward / print_running_episodes
-                    print_avg_reward = round(print_avg_reward, 2)
-
-                    print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step, print_avg_reward))
-
-                    print_running_reward = 0
-                    print_running_episodes = 0
-
                 # save model weights
-                #if time_step % save_model_freq == 0: ## Previous approach to save
-                if print_avg_reward > rew:
-                    print("--------------------------------------------------------------------------------------------")
-                    print("saving model at : " + checkpoint_path)
+                if current_ep_reward > reward_goal and current_ep_reward > max_reward:
                     self.save(checkpoint_path)
-                    print("model saved")
-                    print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
-                    print(f"previous max: {rew}, new max: {print_avg_reward}")
-                    rew=print_avg_reward
-                    print("--------------------------------------------------------------------------------------------")
+                    max_reward=current_ep_reward
 
-                # break; if the episode is over
-                if done:
-                    break
+            print(f"Episode: {episode+1}/{episodes}, Total Reward: {current_ep_reward}")
 
-            print_running_reward += current_ep_reward
-            print_running_episodes += 1
-
-            log_running_reward += current_ep_reward
-            log_running_episodes += 1
-
-            i_episode += 1
-
-        log_f.close()
         self.env.close()
 
         # print total training time
@@ -352,7 +273,7 @@ class PPO:
 
         # preTrained weights directory
 
-        random_seed = 0             #### set this to load a particular checkpoint trained on random seed
+        random_seed = 1             #### set this to load a particular checkpoint trained on random seed
         run_num_pretrained = 0      #### set this to load a particular checkpoint num
 
         directory = "PPO_preTrained" + '/' + 'FlappyBird' + '/'

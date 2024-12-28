@@ -29,7 +29,7 @@ if __name__ == "__main__":
             #PPO
             env = FlappyBirdEnv(fps=fps)
             ppo_agent = ppo.PPO(env, lr_actor=0.0005, lr_critic=0.001, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.6)
-            ppo_agent.train(max_training_timesteps=int(3e6), random_seed=0, max_ep_len=1000)
+            ppo_agent.train(random_seed=1, episodes=3000)
 
     elif action == "3":
         algo = input("Choose the algorithm you want to use: \n[1] DQN \n[2] PPO \n")
