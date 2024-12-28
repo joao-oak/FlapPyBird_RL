@@ -97,6 +97,8 @@ class PPO:
         self.gamma = gamma
         self.eps_clip = eps_clip
         self.K_epochs = K_epochs
+        self.lr_actor = lr_actor
+        self.lr_critic = lr_critic
         
         self.buffer = RolloutBuffer()
 
@@ -345,7 +347,7 @@ class PPO:
         print("Total training time  : ", end_time - start_time)
         print("============================================================================================")
 
-    def test(self, total_test_episodes):
+    def test(self):
         print("============================================================================================")
 
         # preTrained weights directory

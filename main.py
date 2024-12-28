@@ -45,4 +45,4 @@ if __name__ == "__main__":
             # PPO
             env = FlappyBirdEnv(fps=fps)
             ppo_agent = ppo.PPO(env, lr_actor=0.0003, lr_critic=0.001, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.1)
-            ppo_agent.test(total_test_episodes=50)
+            ppo_agent.test()
