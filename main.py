@@ -1,5 +1,4 @@
 import asyncio
-
 from src.flappybird_env import FlappyBirdEnv
 from src import deep_q_n
 from src.flappy import Flappy
@@ -27,9 +26,11 @@ if __name__ == "__main__":
 
         elif algo == "2":
             #PPO
-            env = FlappyBirdEnv(fps=fps)
-            ppo_agent = ppo.PPO(env, lr_actor=0.0005, lr_critic=0.001, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.6)
-            ppo_agent.train(random_seed=1, episodes=3000)
+            for lr_actor in [0.0001,0.0003,0.0005,0.001]:
+                for lr_critic in [0.001, 0.005, 0.009]:
+                    env = FlappyBirdEnv(fps=fps)
+                    ppo_agent = ppo.PPO(env, lr_actor=lr_actor, lr_critic=lr_critic, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.6)
+                    ppo_agent.train(random_seed=5, episodes=3000)
 
     elif action == "3":
         algo = input("Choose the algorithm you want to use: \n[1] DQN \n[2] PPO \n")

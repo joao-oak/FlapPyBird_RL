@@ -5,6 +5,7 @@ from torch.distributions import Categorical
 import os
 import numpy as np
 from datetime import datetime
+import pandas as pd
 
 ################################## set device ##################################
 print("============================================================================================")
@@ -204,14 +205,8 @@ class PPO:
             os.makedirs(directory)
 
         #variables needed to compare models
-        reward_goal = 10000
+        reward_goal = 100
         max_reward = 0
-
-        checkpoint_path = directory + "PPO_{}_{}_{}.pth".format('FlappyBird', random_seed, run_num_pretrained)
-        print("save checkpoint path : " + checkpoint_path)
-        #####################################################
-
-        print("============================================================================================")
 
         ################# training procedure ################
 
@@ -222,43 +217,60 @@ class PPO:
 
         print("============================================================================================")
 
-        update_timestep = 4000
-        time_step = 0
+        for update_timestep in [1000, 4000, 9000]:
+            print(f"actor:{self.lr_actor}, critic:{self.lr_actor}, update_timestep:{update_timestep}")
+            checkpoint_path = directory + "PPO_{}_actor{}_critic{}_tmsp{}.pth".format('FlappyBird', self.lr_actor, self.lr_critic, update_timestep)
+            print("save checkpoint path : " + checkpoint_path)
+            #####################################################
 
-        # training loop
-        for episode in range(episodes):
+            print("============================================================================================")
+            time_step = 0
 
-            state = self.env.reset()
-            current_ep_reward = 0
-            episode_step = 0
-            done = False
+            # training loop
+            csv_episode = []
+            csv_reward = []
+            
+            for episode in range(episodes):
 
-            while not done:
+                state = self.env.reset()
+                current_ep_reward = 0
+                episode_step = 0
+                done = False
 
-                # select action with policy
-                action = self.select_action(state)
-                state, reward, done, _ = self.env.step(action)
+                while not done:
 
-                # saving reward and is_terminals
-                self.buffer.rewards.append(reward)
-                self.buffer.is_terminals.append(done)
+                    # select action with policy
+                    action = self.select_action(state)
+                    state, reward, done, _ = self.env.step(action)
 
-                time_step +=1
-                episode_step += 1
-                current_ep_reward += reward
+                    # saving reward and is_terminals
+                    self.buffer.rewards.append(reward)
+                    self.buffer.is_terminals.append(done)
 
-                # update PPO agent
-                if time_step % update_timestep == 0:
-                    self.update()
+                    time_step +=1
+                    episode_step += 1
+                    current_ep_reward += reward
 
-                # save model weights
-                if current_ep_reward > reward_goal and current_ep_reward > max_reward:
-                    self.save(checkpoint_path)
-                    max_reward=current_ep_reward
+                    # update PPO agent
+                    if time_step % update_timestep == 0:
+                        self.update()
 
-            print(f"Episode: {episode+1}/{episodes}, Total Reward: {current_ep_reward}")
+                    # save model weights
+                    if current_ep_reward > reward_goal and current_ep_reward > max_reward:
+                        self.save(checkpoint_path)
+                        max_reward=current_ep_reward
+                
+                csv_episode.append(episode+1)
+                csv_reward.append(current_ep_reward)
+                print(f"Episode: {episode+1}/{episodes}, Total Reward: {current_ep_reward}")
 
-        self.env.close()
+            #Save file
+            file = pd.DataFrame({'Episode': csv_episode,
+                     'Reward': csv_reward})
+            
+            file.to_csv(f'PPO_tests/PPO_actor{str(self.lr_actor)}_critic{str(self.lr_critic)}_timestep{str(update_timestep)}.csv', index=False)
+            
+            self.env.close()
 
         # print total training time
         print("============================================================================================")
@@ -301,3 +313,11 @@ class PPO:
             self.buffer.clear()
 
         # self.env.close()
+
+
+#CHANGES:
+#reward goal to 100
+#change save model name
+# add csv
+# change place for checkpoint save
+# add for cicle for timesteps
