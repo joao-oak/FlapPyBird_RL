@@ -31,7 +31,7 @@ if __name__ == "__main__":
                     for update_timestep in [1000, 4000, 9000]:
                         print(f"actor:{lr_actor}, critic:{lr_critic}, update_timestep:{update_timestep}")
                         env = FlappyBirdEnv(fps=fps)
-                        ppo_agent = ppo.PPO(env, lr_actor=lr_actor, lr_critic=lr_critic, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.6)
+                        ppo_agent = ppo.PPO(env, lr_actor=lr_actor, lr_critic=lr_critic, update_timestep=update_timestep, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.6)
                         ppo_agent.train(random_seed=5, episodes=3000)
 
     elif action == "3":
