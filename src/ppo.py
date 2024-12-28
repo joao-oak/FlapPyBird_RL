@@ -345,7 +345,7 @@ class PPO:
         print("Total training time  : ", end_time - start_time)
         print("============================================================================================")
 
-    def test(self, total_test_episodes, max_ep_len):
+    def test(self, total_test_episodes):
         print("============================================================================================")
 
         # preTrained weights directory
@@ -361,33 +361,20 @@ class PPO:
 
         print("--------------------------------------------------------------------------------------------")
 
-        test_running_reward = 0
+        ep_reward = 0
+        state = self.env.reset()
 
-        for ep in range(1, total_test_episodes+1):
-            ep_reward = 0
-            state = self.env.reset()
+        while True:
+            action = self.select_action(state)
+            state, reward, done, _ = self.env.step(action)
+            ep_reward += reward
 
-            for t in range(1, max_ep_len+1):
-                action = self.select_action(state)
-                state, reward, done, _ = self.env.step(action)
-                ep_reward += reward
-
-                if done:
-                    break
+            if done:
+                print(f"Total Reward: {ep_reward}")
+                ep_reward = 0
+                state = self.env.reset()
 
             # clear buffer
             self.buffer.clear()
 
-            test_running_reward +=  ep_reward
-            print('Episode: {} \t\t Reward: {}'.format(ep, round(ep_reward, 2)))
-            ep_reward = 0
-
-        self.env.close()
-
-        print("============================================================================================")
-
-        avg_test_reward = test_running_reward / total_test_episodes
-        avg_test_reward = round(avg_test_reward, 2)
-        print("average test reward : " + str(avg_test_reward))
-
-        print("============================================================================================")
+        # self.env.close()
