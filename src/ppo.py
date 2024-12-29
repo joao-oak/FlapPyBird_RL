@@ -315,6 +315,57 @@ class PPO:
 
         # self.env.close()
 
+    def test_models(self):
+        print("============================================================================================")
+
+        # preTrained weights directory
+
+        random_seed = 1             #### set this to load a particular checkpoint trained on random seed
+        run_num_pretrained = 0      #### set this to load a particular checkpoint num
+        directory = "PPO_preTrained" + '/' + 'FlappyBird' + '/'
+
+        for lr_actor in [0.0001,0.0003,0.0005,0.001]:
+                for lr_critic in [0.001, 0.005, 0.009]:
+                    for update_timestep in [1000, 4000, 9000]:
+                        csv_score = []
+                        csv_run = []
+                        checkpoint_path = directory + f"PPO_FlappyBird_actor{lr_actor}_critic{lr_critic}_tmsp{update_timestep}.pth"
+                        print("loading network from : " + checkpoint_path)
+
+                        self.load(checkpoint_path)
+
+                        print("--------------------------------------------------------------------------------------------")
+
+                        ep_reward = 0
+                        state = self.env.reset()
+                        run = True
+                        count=0
+
+                        while run==True:
+                            action = self.select_action(state)
+                            state, reward, done, _ = self.env.step(action)
+                            ep_reward += reward
+
+                            if done:
+                                csv_run.append(count+1)
+                                count+=1
+                                print(f"run:{count}, Total Reward: {ep_reward}, score: {self.env.game.score.score}",)
+                                ep_reward = 0
+                                csv_score.append(self.env.game.score.score)
+                                state = self.env.reset()
+
+                            # clear buffer
+                            self.buffer.clear()
+
+                            if count==50:
+                                run=False
+                        
+                        df = pd.DataFrame({
+                                    'run': csv_run,
+                                    'score': csv_score
+                                })
+                        df.to_csv(f'PPO_models_test/PPO_FlappyBird_actor{lr_actor}_critic{lr_critic}_tmsp{update_timestep}.csv', index=False)
+
 
 #CHANGES:
 #reward goal to 100
