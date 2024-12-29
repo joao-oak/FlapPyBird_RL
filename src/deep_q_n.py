@@ -48,7 +48,7 @@ class DQNetwork(nn.Module):
         return self.fc3(x)
 
 class DQNAgent:
-    def __init__(self, env, learning_rate=5e-4, gamma=0.99, tau=0.01, epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=10000):
+    def __init__(self, env, learning_rate=5e-5, gamma=0.99, tau=0.005, epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=1000):
         self.epsilon_start = epsilon_start
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -56,7 +56,7 @@ class DQNAgent:
         self.tau = tau
         self.batch_size = batch_size
         self.learning_rate = learning_rate
-        self.update_target_frequency = 1000
+        self.update_target_frequency = 20
 
         self.env = env
         state = env.reset()

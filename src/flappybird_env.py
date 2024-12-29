@@ -42,18 +42,18 @@ class FlappyBirdEnv(gym.Env):
         reward = 1 # 1 for not dying
 
         if self.game.player.collided(self.game.pipes, self.game.floor):
-            reward -= 500
+            reward -= 100
         # if self.game.player.y > 300 or self.game.player.y < 150:
         #      reward -= 5
         for i, pipe in enumerate(self.game.pipes.upper):
             if self.game.player.crossed(pipe):
-                reward += 100  # Reward for passing a pipe
+                reward += 10  # Reward for passing a pipe
         
         if state[0] >= state[4] and state[0] <= state[3]:
             reward += 5 # Reward for staying within the pipe gap
 
         if self.game.score.score % 5 == 0 and self.game.score.score != 0:
-            reward += 200
+            reward += 100
         
         # dar reward mais negativa quando perde e menos positiva quando passa o pipe (inverter a lógica: -10/+50 -> -100/+10)
         # adicionar rewards dinâmicas para ele passar o pipe o mais longe possível
