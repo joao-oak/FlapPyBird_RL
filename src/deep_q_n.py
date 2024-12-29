@@ -48,7 +48,7 @@ class DQNetwork(nn.Module):
         return self.fc3(x)
 
 class DQNAgent:
-    def __init__(self, env, learning_rate=1e-4, gamma=0.99, tau=0.005, epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=10000):
+    def __init__(self, env, learning_rate=5e-4, gamma=0.99, tau=0.01, epsilon_start=0.5, epsilon_min=0.001, epsilon_decay=1000, batch_size=32, memory_size=10000):
         self.epsilon_start = epsilon_start
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
@@ -56,7 +56,7 @@ class DQNAgent:
         self.tau = tau
         self.batch_size = batch_size
         self.learning_rate = learning_rate
-        self.update_target_frequency = 20
+        self.update_target_frequency = 1000
 
         self.env = env
         state = env.reset()
@@ -165,12 +165,12 @@ class DQNAgent:
         # Deep Q-Network (DQN)
 
         # PERCEBER SE O MODEL.TRAIN() É PRECISO AQUI OU NÃO
+        self.steps_done = 0
 
         for episode in range(episodes):
             state = self.env.reset()
             state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
             total_reward = 0
-            self.steps_done = 0
             done = False
             
             while not done:

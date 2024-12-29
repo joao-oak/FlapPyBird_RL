@@ -22,7 +22,7 @@ if __name__ == "__main__":
             # DQN
             env = FlappyBirdEnv(fps=fps)
             model = deep_q_n.DQNAgent(env)
-            model.training(5000)
+            model.training(3000)
 
         elif algo == "2":
             #PPO
