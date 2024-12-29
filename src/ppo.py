@@ -290,6 +290,7 @@ class PPO:
 
         directory = "PPO_preTrained" + '/' + 'FlappyBird' + '/'
         checkpoint_path = directory + "PPO_{}_{}_{}.pth".format('FlappyBird', random_seed, run_num_pretrained)
+        checkpoint_path = directory + "PPO_FlappyBird_actor0.0001_critic0.001_tmsp9000.pth"
         print("loading network from : " + checkpoint_path)
 
         self.load(checkpoint_path)

@@ -47,5 +47,5 @@ if __name__ == "__main__":
         elif algo == "2":
             # PPO
             env = FlappyBirdEnv(fps=fps)
-            ppo_agent = ppo.PPO(env, lr_actor=0.0003, lr_critic=0.001, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.1)
+            ppo_agent = ppo.PPO(env, lr_actor=0.0003, lr_critic=0.001, update_timestep=10, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.1)
             ppo_agent.test()
