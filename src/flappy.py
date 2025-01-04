@@ -35,7 +35,7 @@ class Flappy:
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
             self.score = Score(self.config)
-            # await self.splash()
+            await self.splash()
             await self.play()
             await self.game_over()
 
@@ -239,7 +239,7 @@ class Flappy:
         for i, pipe in enumerate(self.pipes.upper):
             if self.player.crossed(pipe):
                 self.score.add()
-                if self.score.score == 50:
+                if self.score.score == 1000:
                     return True
 
         if flap_this_frame:
