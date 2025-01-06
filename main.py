@@ -26,13 +26,9 @@ if __name__ == "__main__":
 
         elif algo == "2":
             #PPO
-            for lr_actor in [0.0001,0.0003,0.0005,0.001]:
-                for lr_critic in [0.001, 0.005, 0.009]:
-                    for update_timestep in [1000, 4000, 9000]:
-                        print(f"actor:{lr_actor}, critic:{lr_critic}, update_timestep:{update_timestep}")
-                        env = FlappyBirdEnv(fps=fps)
-                        ppo_agent = ppo.PPO(env, lr_actor=lr_actor, lr_critic=lr_critic, update_timestep=update_timestep, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.6)
-                        ppo_agent.train(random_seed=4, episodes=3000)
+            env = FlappyBirdEnv(fps=fps)
+            ppo_agent = ppo.PPO(env, lr_actor=0.0001, lr_critic=0.001, update_timestep=9000, gamma=0.99, K_epochs=80, eps_clip=0.2, action_std_init=0.6)
+            ppo_agent.train(random_seed=4, episodes=3000)
 
     elif action == "3":
         algo = input("Choose the algorithm you want to use: \n[1] DQN \n[2] PPO \n")
