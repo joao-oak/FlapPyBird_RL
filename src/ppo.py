@@ -206,7 +206,7 @@ class PPO:
             os.makedirs(directory)
 
         #variables needed to compare models
-        reward_goal = 100
+        reward_goal = 0
         max_reward = 0
 
         ################# training procedure ################
@@ -366,10 +366,3 @@ class PPO:
                                 })
                         df.to_csv(f'PPO_models_test/PPO_FlappyBird_actor{lr_actor}_critic{lr_critic}_tmsp{update_timestep}.csv', index=False)
 
-
-#CHANGES:
-#reward goal to 100
-#change save model name
-# add csv
-# change place for checkpoint save
-# add for cicle for timesteps
