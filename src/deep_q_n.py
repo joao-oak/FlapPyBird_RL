@@ -87,21 +87,6 @@ class DQNAgent:
         
         with torch.no_grad():
             return self.policy_model(state).max(1).indices.view(1, 1)
-        
-
-    # def plot_rewards(self, episode):
-
-    #     rewards_t = torch.tensor(self.episode_rewards, dtype=torch.float)
-    #     plt.title('DQN Result')
-    #     plt.xlabel('Episode')
-    #     plt.ylabel('Total Rewards')
-    #     plt.plot(rewards_t.numpy(), color="tab:blue")
-    #     # Take 100 episode averages and plot them too
-    #     if len(rewards_t) >= 100:
-    #         means = rewards_t.unfold(0, 100, 1).mean(1).view(-1)
-    #         means = torch.cat((torch.zeros(99), means))
-    #         plt.plot(means.numpy(), color="tab:orange")
-    #     plt.savefig(f'chart_{episode}.png', dpi=300) 
 
     def plot_rewards(self, episode):
         rewards_t = torch.tensor(self.episode_rewards, dtype=torch.float)
@@ -156,15 +141,8 @@ class DQNAgent:
         torch.nn.utils.clip_grad_value_(self.policy_model.parameters(), 100)
         self.optimizer.step()
     
-        # # Decay epsilon
-        # if self.epsilon > self.epsilon_min:
-        #     self.epsilon *= self.epsilon_decay
-
     def training(self, episodes, seed=21):
 
-        # Deep Q-Network (DQN)
-
-        # PERCEBER SE O MODEL.TRAIN() É PRECISO AQUI OU NÃO
         self.steps_done = 0
 
         for episode in range(episodes):
@@ -196,14 +174,6 @@ class DQNAgent:
                 # Train the policy model
                 self.replay()
 
-                # soft update of the target model
-                # # if self.steps_done % self.update_target_frequency == 0: # to update the target model every update_target_frequency steps
-                # target_model_state_dict = self.target_model.state_dict() # dictionary that maps each layer to its parameter tensor
-                # policy_model_state_dict = self.policy_model.state_dict()
-                # for key in policy_model_state_dict:
-                #     target_model_state_dict[key] = policy_model_state_dict[key]*self.tau + target_model_state_dict[key]*(1-self.tau)
-                # self.target_model.load_state_dict(target_model_state_dict)
-
                 if self.steps_done % self.update_target_frequency == 0:
                     for target_param, policy_param in zip(self.target_model.parameters(), self.policy_model.parameters()):
                         target_param.data.copy_(self.tau * policy_param.data + (1.0 - self.tau) * target_param.data)
@@ -220,7 +190,7 @@ class DQNAgent:
 
             print(f"Episode: {episode+1}/{episodes}, Total Reward: {total_reward}")
 
-            # if total_reward > 70000:
+            # if total_reward > 40000:
             #     torch.save(self.target_model.state_dict(), f'DQNweights_{episode}.pt')
             #     print(f'Saved weigths after {episode} episodes')
         

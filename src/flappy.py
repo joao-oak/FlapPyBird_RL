@@ -92,17 +92,7 @@ class Flappy:
             for event in pygame.event.get():
                 self.check_quit_event(event)
                 if self.is_tap_event(event):
-                    self.player.flap()
-                    # pos, vel, next_h, next_v_l, next_v_u, next_next_h, next_next_v_l, next_next_v_u = self.game_state()
-                    # print(pos, vel, next_h, next_v_l, next_v_u, next_next_h, next_next_v_l, next_next_v_u)
-            
-            ##
-            # current_time = pygame.time.get_ticks()
-            # time_interval = random.randint(200, 700)
-            # if current_time - last_flap_time >= time_interval:
-            #     self.player.flap()
-            #     last_flap_time = current_time
-            ##
+                    self.player.flap()        
 
             self.background.tick()
             self.floor.tick()
@@ -174,42 +164,8 @@ class Flappy:
         # mid-point 
         next_pipe_mid = (next_pipe_l_y + next_pipe_u_y) /2 # not including for now
 
-        ### Para passar dois pipes. Normalizado
-        # if len(self.pipes.lower) == 1:
-        #     next_pipe = self.pipes.lower[0]
-
-        #     next_pipe_distance_h = (next_pipe.x - self.player.x) / 288
-        #     next_pipe_distance_v_l = (next_pipe.y - player_height) / 512
-        #     next_pipe_distance_v_u = (next_pipe_distance_v_l - self.pipes.pipe_gap) / 512
-
-        #     next_next_pipe_distance_h = (2*(next_pipe_distance_h)) / 288
-        #     next_next_pipe_distance_v_l = (next_pipe_distance_v_l) / 512
-        #     next_next_pipe_distance_v_u = (next_pipe_distance_v_u) / 512
-        
-        # else:
-        #     next_pipe = self.pipes.lower[0]
-        #     next_next_pipe = self.pipes.lower[1]
-
-        #     next_pipe_distance_h = (next_pipe.x - self.player.x) / 288
-        #     next_pipe_distance_v_l = (next_pipe.y - player_height) / 512
-        #     next_pipe_distance_v_u = (next_pipe_distance_v_l - self.pipes.pipe_gap) / 512
-
-        #     next_next_pipe_distance_h = (next_next_pipe.x - self.player.x) / 288
-        #     next_next_pipe_distance_v_l = (next_next_pipe.y - player_height) / 512
-        #     next_next_pipe_distance_v_u = (next_next_pipe_distance_v_l - self.pipes.pipe_gap) / 512
-        ###############################################
-
-        # # player's vertical distance to the next lower pipe
-        # next_pipe_distance_v_l = next_pipe.y - player_height
-
-        # # player's vertical distance to the next upper pipe
-        # next_pipe_distance_v_u = next_pipe_distance_v_l - self.pipes.pipe_gap
-
-        # return player_height, player_velocity, next_pipe_distance_h, next_pipe_distance_v_l, next_pipe_distance_v_u, next_next_pipe_distance_h, next_next_pipe_distance_v_l, next_next_pipe_distance_v_u
         return player_height, player_velocity, next_pipe_distance_h, next_pipe_l_y, next_pipe_u_y
-        # Pomos as ditancias em absoluto ou a diferença para o height do player?
-        # Acho que as diferenças é capaz de ser melhor e mais direto. Assim o modelo tenta minimizar as distâncias diretamente em
-        # vez de ter de conciliar a distância em aboluto e a player height para derivar a diferença
+
 
     def reset(self):
         # from start()
